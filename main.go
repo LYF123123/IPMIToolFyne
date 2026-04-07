@@ -4,15 +4,16 @@ import (
 	"context"
 	"log"
 
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/widget"
 	"github.com/bougou/go-ipmi"
 )
 
 func main() {
-	// a := app.New()
-	// w := a.NewWindow("Hello World!")
-	// w.SetContent(widget.NewLabel("Hello World!"))
-	// w.ShowAndRun()
-
+	a := app.New()
+	w := a.NewWindow("Hello World!")
+	w.SetContent(widget.NewLabel("Hello World!"))
+	w.ShowAndRun()
 
 	client, err := ipmi.NewClient(Hostname, Port, Username, Password)
 	client.WithInterface(ipmi.InterfaceLanplus)
@@ -42,7 +43,7 @@ func main() {
 	for _, sdr := range sdrs {
 		// switch sdr.SensorName() {
 		// case "FAN1":
-			log.Printf(sdr.String())
+		log.Printf(sdr.String())
 		// }
 	}
 }

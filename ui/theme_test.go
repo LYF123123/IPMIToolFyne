@@ -1,5 +1,5 @@
 // https://github.com/fyne-io/demo/blob/main/theme_test.go
-package main
+package ui
 
 import (
 	"testing"
@@ -12,8 +12,8 @@ import (
 
 func TestForceVariantTheme_Color(t *testing.T) {
 	test.NewApp()
-	dark := &forcedVariant{Theme: theme.DefaultTheme(), variant: theme.VariantDark}
-	light := &forcedVariant{Theme: theme.DefaultTheme(), variant: theme.VariantLight}
+	dark := &ForcedVariant{Theme: theme.DefaultTheme(), Variant: theme.VariantDark}
+	light := &ForcedVariant{Theme: theme.DefaultTheme(), Variant: theme.VariantLight}
 	unspecified := fyne.ThemeVariant(99)
 
 	assert.Equal(t, theme.DefaultTheme().Color(theme.ColorNameForeground, theme.VariantDark), dark.Color(theme.ColorNameForeground, unspecified))

@@ -6,8 +6,11 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
+
+const preferenceCurrentItem = "currentItem"
 
 var topWindow fyne.Window
 
@@ -19,47 +22,54 @@ func main() {
 	w.SetMainMenu(ui.MakeMenu(a, w))
 	w.SetMaster()
 
-	content := container.NewStack()
-	title := widget.NewLabel("Component name")
-	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
-	intro.Wrapping = fyne.TextWrapWord
+	contentStage := container.NewStack()
 
-	top := container.NewVBox(title, widget.NewSeparator(), intro)
-	setItem := func(i ui.Item) {
-		if fyne.CurrentDevice().IsMobile() {
-			child := a.NewWindow(i.Title)
-			topWindow = child
-			child.SetContent(i.View(topWindow))
-			child.Show()
-			child.SetOnClosed(func() {
-				topWindow = w
+	// Light and Dark change
+	themes := container.NewGridWithColumns(2,
+		widget.NewButton("Dark", func() {
+			a.Settings().SetTheme(&ui.ForcedVariant{
+				Theme:   theme.DefaultTheme(),
+				Variant: theme.VariantDark,
 			})
-			return
-		}
-		title.SetText(i.Title)
-		isMarkdown := len(i.Intro) == 0
-		if isMarkdown {
-			intro.SetText(i.Intro)
-		}
+		}),
+		widget.NewButton("Light", func() {
+			a.Settings().SetTheme(&ui.ForcedVariant{
+				Theme:   theme.DefaultTheme(),
+				Variant: theme.VariantLight,
+			})
+		}),
+	)
+	// left Nav
+	ids := ui.ItemIndex[""]
+	navList := widget.NewList(
+		func() int {
+			return len(ids)
+		},
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Menu Template")
+		},
+		func(id widget.ListItemID, o fyne.CanvasObject) {
+			key := ids[id]
+			o.(*widget.Label).SetText(ui.Items[key].Title)
+		},
+	)
+	navList.OnSelected = func(id widget.ListItemID) {
+		key := ids[id]
+		item := ui.Items[key]
 
-		if i.Title == "System Status" || isMarkdown {
-			top.Hide()
-		} else {
-			top.Show()
+		for _, f := range ui.OnChangeFuncs {
+			f()
 		}
-
-		content.Objects = []fyne.CanvasObject{i.View(w)}
-		content.Refresh()
+		ui.OnChangeFuncs = nil
+		contentStage.Objects = []fyne.CanvasObject{item.View(w)}
+		contentStage.Refresh()
 	}
-	item:=container.NewBorder(top,nil,nil,nil,content)
-	if fyne.CurrentDevice().IsMobile(){
-		w.SetContent(make)
-	}
+	leftNav := container.NewBorder(nil, themes, nil, nil, navList)
+	split := container.NewHSplit(leftNav, contentStage)
+	split.Offset = 0.2
+	w.SetContent(split)
+	navList.Select(0)
 
-
-
-
-
-	w.Resize(fyne.NewSize(640, 460))
+	w.Resize(fyne.NewSize(800, 600))
 	w.ShowAndRun()
 }

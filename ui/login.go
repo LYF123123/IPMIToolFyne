@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"IPMITOOLFYNE/session"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
@@ -27,12 +29,28 @@ func ShowLoginDialog(a fyne.App, w fyne.Window, stage *fyne.Container) {
 		{Text: "Password", Widget: pass},
 	}
 
-	d:=dialog.NewForm("IPMI Login","Connect","Exit",items,func (ok bool)  {
-		if !ok{
+	d := dialog.NewForm("IPMI Login", "Connect", "Exit", items, func(ok bool) {
+		if !ok {
 			a.Quit()
 			return
 		}
-		err:=
-	})
+		err := session.GetInstance().Login(host.Text, port.Text, user.Text, pass.Text)
+		if err != nil {
+			errWin := dialog.NewError(err, w)
+			errWin.SetOnClosed(
+				func() {
+					ShowLoginDialog(a, w, stage)
+				})
+			errWin.Show()
+			return
+		}
+		p.SetString("host", host.Text)
+		p.SetString("port", port.Text)
+		p.SetString("user", user.Text)
+		p.SetString("pass", pass.Text)
 
+		InitMainUI(a, w, stage)
+	}, w)
+	d.Resize(fyne.NewSize(400, 300))
+	d.Show()
 }

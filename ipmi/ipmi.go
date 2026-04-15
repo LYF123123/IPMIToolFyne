@@ -1,3 +1,0 @@
-package ipmi
-
-func 

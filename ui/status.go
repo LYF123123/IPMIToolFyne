@@ -13,12 +13,16 @@ func StatusScreen(_ fyne.Window) fyne.CanvasObject {
 
 	sdrs := session.GetInstance().GetSDRs()
 	log.Println("is sdrs ==nil?")
-	log.Println(sdrs==nil)
+	log.Println(sdrs == nil)
+	var sdrLabel []fyne.CanvasObject
+	sdrLabel = append(sdrLabel, widget.NewLabelWithStyle("\n\nSystem Status", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
 	for _, sdr := range sdrs {
+		// For now, I show every element from SDRs.
+		// Of course, This is stupid, I will change soon
 		log.Printf(sdr.String())
+		sdrLabel = append(sdrLabel, widget.NewLabelWithStyle("\n\n"+sdr.String(), fyne.TextAlignCenter, fyne.TextStyle{Italic: true}))
 	}
-	content := container.NewVBox(
-		widget.NewLabelWithStyle("\n\nSystem Status", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-		widget.NewLabelWithStyle("\n\n", fyne.TextAlignCenter, fyne.TextStyle{Italic: true}))
-	return content
+	content := container.NewVBox(sdrLabel...)
+	scroll := container.NewVScroll(content)
+	return scroll
 }

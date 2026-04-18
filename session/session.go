@@ -27,6 +27,7 @@ func GetInstance() *SessionManager {
 	once.Do(
 		func() {
 			manager = &SessionManager{}
+			log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 		})
 	return manager
 }
@@ -67,14 +68,6 @@ func (s *SessionManager) Login(host, port, user, pass string) error {
 	}
 	log.Println(guid)
 	s.UpdateClient(client)
-	// init 
-	//! this code is very ugly, must be rewrite
-	newList, err := s.client.GetSDRs(ctx)
-	if err != nil {
-		log.Println(err)	
-	}
-	s.UpdateSDRs(newList)
-
 	//Start auto refresh sdr
 	ctx, cancelMonitor = context.WithCancel(context.Background())
 	s.StartAutoRefresh(ctx)
@@ -121,10 +114,18 @@ func (s *SessionManager) StartAutoRefresh(ctx context.Context) {
 }
 
 func (s *SessionManager) doRefresh(ctx context.Context) {
-	newList, err := s.client.GetSDRs(ctx)
+	rawSDRs, err := s.client.GetSDRs(ctx)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	s.UpdateSDRs(newList)
+	var cleanSDRs []*ipmi.SDR
+	for _, item := range rawSDRs {
+		// Create one clean slice
+		if item != nil && item.SensorName() != "" && (item.Full != nil || item.Compact != nil) {
+			cleanSDRs = append(cleanSDRs, item)
+		}
+	}
+	log.Println("Do Refresh")
+	s.UpdateSDRs(cleanSDRs)
 }

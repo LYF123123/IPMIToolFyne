@@ -17,7 +17,21 @@ func StatusScreen(_ fyne.Window) fyne.CanvasObject {
 	log.Print("is sdrs ==nil? : ")
 	log.Println(sdrs == nil)
 
-	header := widget.NewLabelWithStyle("\n\nSystem Status", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+	title := widget.NewLabelWithStyle("BMC SENSOR MONITOR", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+	title.Importance = widget.HighImportance
+
+	columnTitle := container.NewGridWithColumns(3,
+		widget.NewLabelWithStyle("Sensor Name", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("Reading", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}),
+		widget.NewLabelWithStyle("Unit/Status", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+	)
+
+	topContainer := container.NewVBox(
+		container.NewPadded(title),
+		widget.NewSeparator(),
+		container.NewPadded(columnTitle),
+	)
+
 	loading := container.NewCenter(container.NewVBox(widget.NewProgressBarInfinite(), widget.NewLabel("Data Syncing...")))
 	list := widget.NewList(
 		func() int { return len(sdrs) },
@@ -51,7 +65,7 @@ func StatusScreen(_ fyne.Window) fyne.CanvasObject {
 			unitL.SetText(unitStr)
 		},
 	)
-	listContainer := container.NewBorder(header, nil, nil, nil, list)
+	listContainer := container.NewBorder(topContainer, nil, nil, nil, list)
 	statusStack := container.NewStack(loading, listContainer)
 	go func() {
 		ticker := time.NewTicker(100 * time.Millisecond)

@@ -19,6 +19,7 @@ var (
 		"": {"status", "fans"},
 	}
 )
-
+// TODO
+// new SDRs parameters list
 
 var OnChangeFuncs []func()

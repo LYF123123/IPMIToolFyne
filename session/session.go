@@ -129,3 +129,41 @@ func (s *SessionManager) doRefresh(ctx context.Context) {
 	log.Println("Do Refresh")
 	s.UpdateSDRs(cleanSDRs)
 }
+
+// !Warning, I only have one 4028GR-TR server. the function does not test on other server!!!!!
+func (s *SessionManager) SetSuperMicroFanSpeed(zone, speed byte) {
+	// You must set fan mode as full mode first!!
+	ctx := context.Background()
+	NetFN := ipmi.NetFn(0x30)
+	Cmd := uint8(0x70)
+	data := []byte{0x66, 0x01, zone, speed}
+	s.client.RawCommand(ctx, NetFN, Cmd, data, "SetSuperMicroFanSpeed")
+	log.Println("SetSuperMicroFanSpeed")
+}
+
+func (s *SessionManager) SetSuperMicroFanFull() {
+	ctx := context.Background()
+	NetFN := ipmi.NetFn(0x30)
+	Cmd := uint8(0x45)
+	data := []byte{0x01, 0x01}
+	s.client.RawCommand(ctx, NetFN, Cmd, data, "SetSuperMicroFanFull")
+	log.Println("SetSuperMicroFanFull")
+}
+
+func (s *SessionManager) SetSuperMicroFanOptimal() {
+	ctx := context.Background()
+	NetFN := ipmi.NetFn(0x30)
+	Cmd := uint8(0x45)
+	data := []byte{0x01, 0x02}
+	s.client.RawCommand(ctx, NetFN, Cmd, data, "SetSuperMicroFanOptimal")
+	log.Println("SetSuperMicroFanOptimal")
+}
+
+func (s *SessionManager) SetSuperMicroFanHeavyIO() {
+	ctx := context.Background()
+	NetFN := ipmi.NetFn(0x30)
+	Cmd := uint8(0x45)
+	data := []byte{0x01, 0x03}
+	s.client.RawCommand(ctx, NetFN, Cmd, data, "SetSuperMicroFanHeavyIO")
+	log.Println("SetSuperMicroFanHeavyIO")
+}

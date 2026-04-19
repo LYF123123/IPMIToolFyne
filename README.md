@@ -24,7 +24,6 @@ This is a lightweight, cross-platform IPMI management utility designed for real-
 * **SDR Monitor:** Real-time visualization of all Sensor Data Records (Fans, Temp, Voltage, etc.).
 * **Thermal Management:** Quick switching between SuperMicro fan modes (Full, Optimal, HeavyIO).
 * **4-Zone Precision Control:** Manual duty-cycle override for individual fan zones.
-* **Persistent Lock:** Includes a background "Fan Keeper" logic to prevent BMC from resetting your custom fan speeds.
 
 ## Hardware Compatibility
 

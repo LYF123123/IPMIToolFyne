@@ -12,9 +12,11 @@ import (
 )
 
 type SessionManager struct {
-	mu          sync.RWMutex
-	client      *ipmi.Client
-	sdrSnapshot atomic.Value
+	mu             sync.RWMutex
+	client         *ipmi.Client
+	sdrSnapshot    atomic.Value
+	sdrMapSnapshot atomic.Value
+	selSnapshot    atomic.Value
 }
 
 var (
@@ -97,6 +99,30 @@ func (s *SessionManager) UpdateSDRs(newSDRs []*ipmi.SDR) {
 	s.sdrSnapshot.Store(newSDRs)
 }
 
+func (s *SessionManager) GetSDRsMap() ipmi.SDRMapBySensorNumber {
+	value := s.sdrMapSnapshot.Load()
+	if value == nil {
+		return nil
+	}
+	return value.(ipmi.SDRMapBySensorNumber)
+}
+
+func (s *SessionManager) UpdateSDRsMap(SDRsMap ipmi.SDRMapBySensorNumber) {
+	s.sdrMapSnapshot.Store(SDRsMap)
+}
+
+func (s *SessionManager) GetSELs() []*ipmi.SEL {
+	value := s.selSnapshot.Load()
+	if value == nil {
+		return nil
+	}
+	return value.([]*ipmi.SEL)
+}
+
+func (s *SessionManager) UpdateSELs(newSELs []*ipmi.SEL) {
+	s.selSnapshot.Store(newSELs)
+}
+
 func (s *SessionManager) StartAutoRefresh(ctx context.Context) {
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)
@@ -126,8 +152,22 @@ func (s *SessionManager) doRefresh(ctx context.Context) {
 			cleanSDRs = append(cleanSDRs, item)
 		}
 	}
+
+	rawSEL, err := s.client.GetSELEntries(ctx, 0)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	rawSDRsMap, err := s.client.GetSDRsMap(ctx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	log.Println("Do Refresh")
 	s.UpdateSDRs(cleanSDRs)
+	s.UpdateSELs(rawSEL)
+	s.UpdateSDRsMap(rawSDRsMap)
 }
 
 // !Warning, I only have one 4028GR-TR server. the function does not test on other server!!!!!
